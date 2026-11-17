@@ -1,0 +1,21 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+.embla__viewport {
+  overflow: hidden;
+}
+
+.embla__container {
+  display: flex;
+  gap: 15px;
+}
+
+.embla__slide {
+  border: 1px solid red;
+
+  height: 300px;
+  text-align: center;
+  flex: 0 0 70%;
+}

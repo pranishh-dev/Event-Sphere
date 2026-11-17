@@ -5,11 +5,11 @@ import { ChevronRight, Compass, Flame, Sparkles } from "lucide-react";
 import React, { useState } from "react";
 import { Link } from "react-router";
 
-export default function HomePage() {
+export default function HomePage({events}) {
   //custom hook import
   // const { isLoading, makeLoading, makeNoLoading } = useLoading();
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <div className="space-y-16 pb-20">
@@ -73,11 +73,11 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/* {isLoading ? (
+        {isLoading ? (
           <div className="aspect-21/9 rounded-3xl bg-[#EBE8DF]/50 animate-pulse"></div>
         ) : (
-          <FeaturedCarousel />
-        )} */}
+          <FeaturedCarousel events={events}/>
+        )}
       </section>
     </div>
   );
