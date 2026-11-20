@@ -1,15 +1,114 @@
 import FeaturedCarousel from "@/components/featuredCarousel";
 import { Button } from "@/components/ui/button";
-// import { useLoading } from "@/hooks/useLoading";
-import { ChevronRight, Compass, Flame, Sparkles } from "lucide-react";
-import React, { useState } from "react";
+import axios from "axios";
+import {
+  Briefcase,
+  BriefcaseMedical,
+  ChevronRight,
+  Compass,
+  Cpu,
+  Flame,
+  GraduationCap,
+  Music,
+  Palette,
+  Sparkles,
+  Tag,
+  Trophy,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
 
-export default function HomePage({events}) {
+function findIcon(icon) {
+  switch (icon) {
+    case "palette":
+      return Palette;
+    case "briefcase":
+      return Briefcase;
+    case "music":
+      return Music;
+    case "graduation-cap":
+      return GraduationCap;
+    case "trophy":
+      return Trophy;
+    case "cpu":
+      return Cpu;
+    default:
+      return Tag;
+  }
+}
+
+function findCategoryColor(i) {
+  const colors = [
+    {
+      icon: "bg-orange-50 text-[#E65100] border-orange-200 group-hover:bg-[#E65100] group-hover:text-white",
+      text: "group-hover:text-[#E65100]",
+    },
+    {
+      icon: "bg-blue-50 text-blue-700 border-blue-200 group-hover:bg-blue-600 group-hover:text-white",
+      text: "group-hover:text-blue-600",
+    },
+    {
+      icon: "bg-emerald-50 text-emerald-700 border-emerald-200 group-hover:bg-emerald-600 group-hover:text-white",
+      text: "group-hover:text-emerald-600",
+    },
+    {
+      icon: "bg-purple-50 text-purple-700 border-purple-200 group-hover:bg-purple-600 group-hover:text-white",
+      text: "group-hover:text-purple-600",
+    },
+    {
+      icon: "bg-rose-50 text-rose-700 border-rose-200 group-hover:bg-rose-600 group-hover:text-white",
+      text: "group-hover:text-rose-600",
+    },
+    {
+      icon: "bg-amber-50 text-amber-700 border-amber-200 group-hover:bg-amber-600 group-hover:text-white",
+      text: "group-hover:text-amber-600",
+    },
+  ];
+  return colors[i % colors.length];
+}
+
+export default function HomePage() {
   //custom hook import
   // const { isLoading, makeLoading, makeNoLoading } = useLoading();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [featuredEvents, setFeaturedEvents] = useState(null);
+  const [categories, setCategories] = useState(null);
+
+  useEffect(() => {
+    async function loadHomePage() {
+      try {
+        let {
+          data: { data },
+        } = await axios.get(
+          "https://eventsphere-server-mfdb.onrender.com/api/events",
+        );
+        console.log(data);
+        setFeaturedEvents(data);
+      } catch (error) {}
+
+      try {
+        let {
+          data: { data },
+        } = await axios.get(
+          "https://eventsphere-server-mfdb.onrender.com/api/categories",
+        );
+        console.log(data);
+        setCategories(data);
+      } catch (error) {}
+
+      setIsLoading(false);
+    }
+    loadHomePage();
+  }, []);
+
+  // useEffect(() => {
+  //   console.log(isLoading);
+  //   if (featuredEvents != null && categories!= null) {
+  //     setIsLoading(false);
+  //   }
+
+  // }, [featuredEvents,categories]);
 
   return (
     <div className="space-y-16 pb-20">
@@ -76,8 +175,65 @@ export default function HomePage({events}) {
         {isLoading ? (
           <div className="aspect-21/9 rounded-3xl bg-[#EBE8DF]/50 animate-pulse"></div>
         ) : (
-          <FeaturedCarousel events={events}/>
+          <FeaturedCarousel events={featuredEvents} />
         )}
+      </section>
+
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
+        <div>
+          <h2 className="text-xl font-bold text-stone-900 tracking-tight">
+            Browse by Discipline
+          </h2>
+          <p className="text-xs text-stone-500">
+            Curated tracks dynamically fetched from our active community
+            listings
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+          {isLoading
+            ? [...Array(6)].map((_, i) => {
+                return (
+                  <div className="p-5 aspect-21/9 rounded-3xl bg-white border border-[#EBE8DF] ">
+                    <div className="w-10 h-10 rounded-xl  flex items-center justify-center mb-3  bg-[#EBE8DF]/50  animate-pulse"></div>
+                    <div>
+                      <p className=" bg-[#EBE8DF]/50 animate-pulse w-12 h-2 "></p>
+                      <p className=" mt-0.5  bg-[#EBE8DF]/50 animate-pulse w-[60%] h-2 "></p>
+                    </div>
+                  </div>
+                );
+              })
+            : categories.map(({ name, eventCount, _id, icon }, i) => {
+                // console.log(category);
+                // const {name,eventCount,_id} = category
+                const Icon = findIcon(icon);
+                const color = findCategoryColor(i);
+
+                return (
+                  <Link
+                    key={_id}
+                    to="/explore"
+                    className="p-4 rounded-2xl bg-white border border-[#EBE8DF] hover:border-[#D5D0C2] hover:shadow-subtle transition-all duration-200 group flex flex-col justify-between"
+                  >
+                    <div
+                      className={`w-10 h-10 rounded-xl border flex items-center justify-center mb-3 transition-all duration-200 text-lg ${color?.icon}`}
+                    >
+                      <Icon />
+                    </div>
+                    <div>
+                      <p
+                        className={`text-xs font-bold leading-snug ${color?.text}`}
+                      >
+                        {name}
+                      </p>
+                      <p className="text-[11px] text-stone-400 mt-0.5">
+                        {eventCount} Events
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+        </div>
       </section>
     </div>
   );
