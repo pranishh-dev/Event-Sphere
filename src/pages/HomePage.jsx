@@ -1,6 +1,9 @@
+import Skeleton from "@/components/common/skeleton";
+import { EventCard } from "@/components/events/eventCard";
 import FeaturedCarousel from "@/components/featuredCarousel";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
+import { formatDate } from "date-fns";
 import {
   Briefcase,
   BriefcaseMedical,
@@ -72,8 +75,9 @@ export default function HomePage() {
   // const { isLoading, makeLoading, makeNoLoading } = useLoading();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [featuredEvents, setFeaturedEvents] = useState(null);
-  const [categories, setCategories] = useState(null);
+  const [featuredEvents, setFeaturedEvents] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [trendingEvents, setTrendingEvents] = useState([]);
 
   useEffect(() => {
     async function loadHomePage() {
@@ -97,18 +101,19 @@ export default function HomePage() {
         setCategories(data);
       } catch (error) {}
 
+      try {
+        let {
+          data: { data },
+        } = await axios.get(
+          "https://eventsphere-server-mfdb.onrender.com/api/events?limit=8&sort=startDate&order=asc",
+        );
+        console.log(data);
+        setTrendingEvents(data);
+      } catch (error) {}
       setIsLoading(false);
     }
     loadHomePage();
   }, []);
-
-  // useEffect(() => {
-  //   console.log(isLoading);
-  //   if (featuredEvents != null && categories!= null) {
-  //     setIsLoading(false);
-  //   }
-
-  // }, [featuredEvents,categories]);
 
   return (
     <div className="space-y-16 pb-20">
@@ -156,6 +161,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Carousel */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between pb-4">
           <div className="flex items-center gap-2">
@@ -179,6 +185,7 @@ export default function HomePage() {
         )}
       </section>
 
+      {/* Category Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
         <div>
           <h2 className="text-xl font-bold text-stone-900 tracking-tight">
@@ -194,7 +201,10 @@ export default function HomePage() {
           {isLoading
             ? [...Array(6)].map((_, i) => {
                 return (
-                  <div className="p-5 aspect-21/9 rounded-3xl bg-white border border-[#EBE8DF] ">
+                  <div
+                    key={i}
+                    className="p-5 aspect-21/9 rounded-3xl bg-white border border-[#EBE8DF] "
+                  >
                     <div className="w-10 h-10 rounded-xl  flex items-center justify-center mb-3  bg-[#EBE8DF]/50  animate-pulse"></div>
                     <div>
                       <p className=" bg-[#EBE8DF]/50 animate-pulse w-12 h-2 "></p>
@@ -203,7 +213,7 @@ export default function HomePage() {
                   </div>
                 );
               })
-            : categories.map(({ name, eventCount, _id, icon }, i) => {
+            : categories.map(({ name, eventCount, _id, id, icon }, i) => {
                 // console.log(category);
                 // const {name,eventCount,_id} = category
                 const Icon = findIcon(icon);
@@ -211,7 +221,7 @@ export default function HomePage() {
 
                 return (
                   <Link
-                    key={_id}
+                    key={_id || id}
                     to="/explore"
                     className="p-4 rounded-2xl bg-white border border-[#EBE8DF] hover:border-[#D5D0C2] hover:shadow-subtle transition-all duration-200 group flex flex-col justify-between"
                   >
@@ -233,6 +243,136 @@ export default function HomePage() {
                   </Link>
                 );
               })}
+        </div>
+      </section>
+
+      {/* City Hubs Spotlight */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
+        <div>
+          <h2 className="text-xl font-bold text-stone-900 tracking-tight">
+            Explore by Community Hub
+          </h2>
+          <p className="text-xs text-stone-500">
+            Vibrant hubs where local conclaves thrive
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {trendingEvents.map(({ id, image, city, title }) => (
+            <Link
+              key={id}
+              to="/explore"
+              className="group relative rounded-2xl overflow-hidden aspect-4/3 bg-stone-900 shadow-subtle border border-[#EBE8DF]"
+            >
+              <img
+                src={image}
+                alt={city}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-75"
+              />
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4 text-white">
+                <div className="flex items-center gap-1.5 text-orange-400 text-xs font-semibold">
+                  <span>📍</span>
+                  <span>{city}</span>
+                </div>
+                <p className="text-xs text-stone-300 font-medium mt-0.5">
+                  {title}
+                </p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Upcoming Gatherings Grid */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#EBE8DF]">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
+              Upcoming Gatherings
+            </h2>
+            <p className="text-xs text-stone-500">
+              Verified community events happening in the coming days
+            </p>
+          </div>
+          <Link
+            to="/explore"
+            className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-xs rounded-lg font-medium border border-[#CCC8BA] bg-transparent hover:bg-[#F2F1EC] text-[#222]"
+          >
+            <span>View All Events</span>
+            <span>→</span>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {isLoading
+            ? [...Array(8)].map(() => <Skeleton />)
+            : trendingEvents.map(
+                ({
+                  id,
+                  image,
+                  title,
+                  city,
+                  format,
+                  currency,
+                  category,
+                  price,
+                  startDate,
+                  slug,
+                }) => {
+                  const Icon = findIcon(category.icon);
+                  return (
+                    <EventCard
+                      key={id}
+                      id={id}
+                      image={image}
+                      title={title}
+                      city={city}
+                      format={format}
+                      currency={currency}
+                      category={category}
+                      price={price}
+                      startDate={startDate}
+                      slug={slug}
+                      Icon={Icon}
+                    />
+                  );
+                },
+              )}
+        </div>
+      </section>
+
+      {/* Organizer Callout Banner */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-[#1C1B18] text-white rounded-3xl p-8 sm:p-12 border border-[#33312B] flex flex-col lg:flex-row items-center justify-between gap-8">
+          <div className="max-w-xl space-y-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#FF8A65]">
+              Empowering Community Hosts
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Host your next summit, workshop or indie showcase on EventSphere.
+            </h2>
+            <p className="text-sm text-stone-300 leading-relaxed">
+              Every registered user can organize events. Enjoy seamless
+              ticketing, automatic calendar syncing, verified attendee reviews,
+              and real-time dashboard analytics.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+            <Link
+              to="/create-event"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold px-5 py-2.5 text-base rounded-xl bg-[#E65100] text-white hover:bg-[#D84315] w-full sm:w-auto shadow-lg"
+            >
+              Create Event Now
+            </Link>
+            <Link
+              to="/profile"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold px-5 py-2.5 text-base rounded-xl w-full sm:w-auto bg-white/10 text-white border border-white/20 hover:bg-white/20"
+            >
+              Organizer Portal
+            </Link>
+          </div>
         </div>
       </section>
     </div>

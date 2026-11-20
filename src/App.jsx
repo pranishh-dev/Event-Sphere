@@ -1,6 +1,6 @@
 import { Route, Routes, useLocation } from "react-router";
-import { Navbar } from "./components/Navbar";
-import { Footer } from "./components/Footer";
+import { Navbar } from "./components/common/Navbar";
+import { Footer } from "./components/common/Footer";
 import HomePage from "./pages/HomePage";
 import { useCallback, useEffect, useState } from "react";
 import { NotFoundPage } from "./pages/NotFoundPage";
