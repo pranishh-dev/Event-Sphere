@@ -4,6 +4,8 @@ import { Footer } from "./components/common/Footer";
 import HomePage from "./pages/HomePage";
 import { useCallback, useEffect, useState } from "react";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { EventCard } from "./components/events/eventCard";
+import EventDetailsPage from "./pages/EventDetailsPage";
 
 function App() {
   
@@ -11,7 +13,6 @@ function App() {
   function ScrollToTop() {
     const { pathname } = useLocation();
     useEffect(() => {
-      console.log("HI");
       window.scrollTo({ behavior: "smooth", top: 0 });
     }, [pathname]);
   }
@@ -23,6 +24,7 @@ function App() {
       <div className=" flex-1">
         <Routes>
           <Route path="/" element={<HomePage  />} />
+          <Route path="/events/:slug" element={<EventDetailsPage  />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>

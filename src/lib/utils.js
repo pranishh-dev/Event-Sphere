@@ -18,7 +18,9 @@ export function formatEventDate(dateInput){
   // console.log( format(dateInput,"EE, dd MMM, yyyy \n hh:mm a"));
   return format(dateInput,"EE, dd MMM, yyyy ")
 }
-
+export function formatEventTime(dateInput){
+  return format(dateInput,"hh:mm a")
+}
 // {
 //     "_id": "6ae2488f8b435f97684841d4",
 //     "title": "React Developers Summit 2027",
