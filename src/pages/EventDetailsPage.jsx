@@ -79,10 +79,11 @@ export default function EventDetailsPage() {
   function handleSave() {
     try {
       if (!event) return;
+
       if (isFav) {
-        toast.info("Event removed from favourites!");
+        toast.info(`${title} removed from favourites!`);
       } else {
-        toast.success("Event saved to favourites!");
+        toast.success(`${title} saved to favourites!`);
       }
 
       dispatch(toggleFavourite(event));
@@ -194,7 +195,7 @@ export default function EventDetailsPage() {
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer bg-white border-[#DDD9CE] hover:bg-stone-50 text-stone-700"
           >
             <span>
-              <Bookmark className={`w-4 h-4 ${isFav && "fill-black"}`} />
+              <Bookmark className={`w-4 h-4 ${isFav && "fill-orange-400 text-orange-600"}`} />
             </span>
             <span>Save</span>
           </button>

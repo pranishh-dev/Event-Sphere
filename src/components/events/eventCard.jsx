@@ -1,5 +1,5 @@
 import { formatEventDate, formatPrice } from "@/lib/utils";
-import { toggleFavourite } from "@/store/slices/favouritesSlice";
+import { checkIndexFav, toggleFavourite } from "@/store/slices/favouritesSlice";
 import {
   Bookmark,
   BookmarkCheck,
@@ -8,9 +8,10 @@ import {
   BookmarkX,
   Calendar,
 } from "lucide-react";
-import React from "react";
+import React, { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router";
+import { toast } from "sonner";
 export const EventCard = ({ event }) => {
   const {
     id,
@@ -25,12 +26,32 @@ export const EventCard = ({ event }) => {
     slug,
   } = event;
 
+  // console.log(event);
   const dispatch = useDispatch();
-  const handleFavourite = (e) => {
-    e.preventDefault();
-    dispatch(toggleFavourite(event));
-  };
-  
+
+  const favouriteItems = useSelector((state) => state.favourites.items);
+  const isFav = useMemo(
+    () => (event ? checkIndexFav(favouriteItems, event) >= 0 : false),
+    [favouriteItems, event],
+  );
+
+  function handleSave(e) {
+    try {
+      e.preventDefault()
+      if (!event) return;
+
+      if (isFav) {
+        toast.info(`${title} removed from favourites!`);
+      } else {
+        toast.success(`${title} saved to favourites!`);
+      }
+
+      dispatch(toggleFavourite(event));
+    } catch (error) {
+      toast.error("Failed to save to favourites!");
+    }
+  }
+
   return (
     <Link
       to={`/events/${slug}-${id}`}
@@ -45,15 +66,15 @@ export const EventCard = ({ event }) => {
           />
           <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
             <span className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-black/70 text-white backdrop-blur-md shadow-sm">
-              {category.name}
+              {category?.name}
             </span>
             <button
-              onClick={handleFavourite}
+              onClick={handleSave}
               type="button"
               className="pointer-events-auto w-8 h-8 rounded-full bg-white/90 backdrop-blur-md shadow-sm border border-black/5 flex items-center justify-center text-stone-700 text-xs"
             >
               <span>
-                <Bookmark className={`w-4 h-4 `} />
+                <Bookmark className={`w-4 h-4 ${isFav && "fill-orange-400 text-orange-600"}`} />
               </span>
             </button>
           </div>

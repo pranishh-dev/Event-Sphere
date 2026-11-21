@@ -3,7 +3,7 @@ import { toggleFavourite } from "./favouritesSlice";
 
 const eventsSlice = +createSlice({
   name: "events",
-  initialState: { events: [] },
+  initialState: { events: JSON.parse(localStorage.getItem("eventsphere-explore-events")) || [] },
   reducers: {},
 });
 

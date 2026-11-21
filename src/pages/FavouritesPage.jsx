@@ -4,6 +4,7 @@ import { clearFavourites } from "@/store/slices/favouritesSlice";
 import { Bookmark } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router";
+import { toast } from "sonner";
 
 export default function FavouritesPage() {
   const dispatch = useDispatch();
@@ -29,6 +30,7 @@ export default function FavouritesPage() {
               e.preventDefault();
               if (window.confirm("Clear all saved events?")) {
                 dispatch(clearFavourites());
+                toast.success("All events removed from favourites!")
               }
             }}
             size="sm"
@@ -42,13 +44,13 @@ export default function FavouritesPage() {
 
       {favourites.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {favourites?.map((event) => {
+          {favourites.map((event) => {
             return <EventCard event={event} key={event.id || event._id} />;
           })}
         </div>
       ) : (
         <div className="bg-white rounded-3xl border border-[#EBE8DF] p-12 text-center max-w-lg mx-auto space-y-4 shadow-subtle">
-          <div className="w-14 h-14 bg-orange-50 text-[#E65100] rounded-2xl flex items-center justify-center mx-auto border border-orange-100">
+          <div className="w-14 h-14 fill-orange-400 text-orange-600 rounded-2xl flex items-center justify-center mx-auto border border-orange-100">
             <Bookmark className="w-7 h-7" />
           </div>
           <div className="space-y-1">
