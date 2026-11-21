@@ -1,7 +1,16 @@
 import { formatEventDate, formatPrice } from "@/lib/utils";
+import { toggleFavourite } from "@/store/slices/favouritesSlice";
+import {
+  Bookmark,
+  BookmarkCheck,
+  BookmarkCheckIcon,
+  BookmarkPlus,
+  BookmarkX,
+  Calendar,
+} from "lucide-react";
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router";
-
 export const EventCard = ({
   id,
   image,
@@ -13,14 +22,15 @@ export const EventCard = ({
   price,
   startDate,
   slug,
-  Icon
-  
+  Icon,
 }) => {
- 
+  const dispatch = useDispatch();
+  const isFavourite = useSelector((state) => state.favourites.isFavourite);
+  console.log(isFavourite);
+
   return (
     <Link
-      
-      to={`/events/${slug}`}
+      to={`/events/${slug}-${id}`}
       className="group bg-white rounded-2xl border border-[#EAE7DC] overflow-hidden flex flex-col justify-between shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_24px_-8px_rgba(0,0,0,0.08)] hover:border-[#D5D0C2] hover:-translate-y-0.5 transition-all duration-300"
     >
       <div>
@@ -35,11 +45,18 @@ export const EventCard = ({
               {category.name}
             </span>
             <button
+              onClick={(e) => {
+                e.preventDefault();
+                // dispatch(increaseCount())
+                dispatch(toggleFavourite());
+              }}
               type="button"
               className="pointer-events-auto w-8 h-8 rounded-full bg-white/90 backdrop-blur-md shadow-sm border border-black/5 flex items-center justify-center text-stone-700 text-xs"
             >
               <span>
-                <Icon />
+                <Bookmark
+                  className={`w-4 h-4 ${isFavourite ? "fill-black" : ""}`}
+                />
               </span>
             </button>
           </div>
@@ -47,7 +64,9 @@ export const EventCard = ({
 
         <div className="p-4 space-y-2">
           <div className="flex items-center gap-2 text-xs font-semibold text-[#C2410C]">
-            <span>📅</span>
+            <span>
+              <Calendar className="w-4 h-4" />
+            </span>
             <span>{formatEventDate(startDate)}</span>
             <span className="text-stone-300 font-normal">•</span>
             <span className="text-stone-500 font-normal truncate">{city}</span>

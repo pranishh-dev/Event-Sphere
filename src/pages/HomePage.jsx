@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { formatDate } from "date-fns";
 import {
+  ArrowRight,
   Briefcase,
   BriefcaseMedical,
   ChevronRight,
@@ -300,13 +301,13 @@ export default function HomePage() {
             className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-xs rounded-lg font-medium border border-[#CCC8BA] bg-transparent hover:bg-[#F2F1EC] text-[#222]"
           >
             <span>View All Events</span>
-            <span>→</span>
+            <span><ArrowRight className="w-4 h-4"/></span>
           </Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {isLoading
-            ? [...Array(8)].map(() => <Skeleton />)
+            ? [...Array(8)].map((_,i) => <Skeleton key={i}/>)
             : trendingEvents.map(
                 ({
                   id,
@@ -320,7 +321,6 @@ export default function HomePage() {
                   startDate,
                   slug,
                 }) => {
-                  const Icon = findIcon(category.icon);
                   return (
                     <EventCard
                       key={id}
@@ -334,7 +334,6 @@ export default function HomePage() {
                       price={price}
                       startDate={startDate}
                       slug={slug}
-                      Icon={Icon}
                     />
                   );
                 },

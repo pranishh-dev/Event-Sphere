@@ -1,13 +1,80 @@
-import { formatEventDate, formatEventTime, formatPrice } from "@/lib/utils";
+import {
+  findDiffTime,
+  formatEventDate,
+  formatPrice,
+  formatTimeRange,
+} from "@/lib/utils";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import {parseISO} from "date-fns"
+import { differenceInDays, parseISO } from "date-fns";
 import { Link, useLocation, useParams } from "react-router";
+import { NotFoundPage } from "./NotFoundPage";
+import {
+  Bookmark,
+  BookmarkIcon,
+  Calendar,
+  Check,
+  CheckCheckIcon,
+  CheckIcon,
+  Clock,
+  LocateFixed,
+  LocateFixedIcon,
+  LocateIcon,
+  LocationEdit,
+  Map,
+  MapPin,
+  PersonStanding,
+  Pin,
+  Share,
+  Shield,
+  ShieldCheck,
+  Sparkle,
+  TicketIcon,
+  Users,
+} from "lucide-react";
+import { toast } from "sonner";
+
+let Modes = {
+  online: "Online Conclave",
+  "in-person": "In-person Gathering",
+  hybrid: "Hybrid Format",
+};
+
+async function handleShare() {
+  try {
+    toast.success("Event Link Copied to Clipboard!");
+    await navigator.clipboard.writeText(window.location.href);
+  } catch (error) {
+    toast.error("Failed to Copy To Clipboard!");
+  }
+}
+
+function handleSave(){
+  try {
+    toast.success("Event Saved to Favourites!");
+     navigator.clipboard.writeText(window.location.href);
+  } catch (error) {
+    toast.error("Failed to Save to Favourites!");
+  }
+}
 
 export default function EventDetailsPage() {
   const [event, setEvent] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { slug } = useParams();
+  const { slugId } = useParams();
+
+  // Find the last hyphen separating the slug from the MongoDB ObjectId
+  const lastHyphenIndex = slugId?.lastIndexOf("-") ?? -1;
+  const slug = lastHyphenIndex !== -1 ? slugId.slice(0, lastHyphenIndex) : "";
+
+  // 1. Extract the text after the last hyphen and verify it's a 24-char MongoDB ID
+  const candidateId = slugId.slice(lastHyphenIndex + 1);
+  const isValidId = /^[a-f\d]{24}$/i.test(candidateId);
+
+  // 2. If there's no valid ID (e.g. /events/react-developers-summit-2027), show 404
+  if (!isValidId) {
+    return <NotFoundPage />;
+  }
 
   async function fetchEvent() {
     setIsLoading(true);
@@ -28,7 +95,6 @@ export default function EventDetailsPage() {
     fetchEvent();
   }, [slug]);
 
-  isLoading ? console.log("Loading...") : console.log(event);
   let {
     _id,
     title,
@@ -64,8 +130,23 @@ export default function EventDetailsPage() {
     id,
   } = event || {};
 
+  let filledPercentage = (registeredCount / capacity) * 100;
+
   if (isLoading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-16 space-y-8 animate-pulse">
+        <div className="h-8 w-40 bg-stone-200 rounded-lg" />
+        <div className="aspect-21/9 bg-stone-200 rounded-3xl" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="h-10 bg-stone-200 rounded-lg w-3/4" />
+            <div className="h-4 bg-stone-200 rounded w-full" />
+            <div className="h-4 bg-stone-200 rounded w-5/6" />
+          </div>
+          <div className="h-64 bg-stone-200 rounded-3xl" />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -82,18 +163,24 @@ export default function EventDetailsPage() {
 
         <div className="flex items-center gap-2">
           <button
+            onClick={handleShare}
             type="button"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#DDD9CE] bg-white hover:bg-stone-50 text-xs font-medium text-stone-700 transition-all cursor-pointer"
           >
-            <span>🔗</span>
+            <span>
+              <Share className="w-4 h-4" />
+            </span>
             <span>Share</span>
           </button>
 
           <button
+          onClick={handleSave}
             type="button"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer bg-white border-[#DDD9CE] hover:bg-stone-50 text-stone-700"
           >
-            <span>🔖</span>
+            <span>
+              <Bookmark className="w-4 h-4" />
+            </span>
             <span>Save</span>
           </button>
         </div>
@@ -110,10 +197,13 @@ export default function EventDetailsPage() {
               {category.name}
             </span>
             <span className="inline-flex items-center gap-1.5 whitespace-nowrap bg-[#EBF3ED] text-[#245436] border border-[#CFE2D4] text-xs px-2.5 py-1 rounded-full font-medium">
-              {format}
+              {Modes[format]}
             </span>
             <span className="inline-flex items-center gap-1.5 whitespace-nowrap bg-[#FFF3E0] text-[#B73E00] border border-[#FFE0B2] text-xs px-2.5 py-1 rounded-full font-medium">
-              <span>✨</span> Featured Pick
+              <span>
+                <Sparkle className="w-4 h-4" />
+              </span>{" "}
+              Featured Pick
             </span>
           </div>
 
@@ -123,15 +213,24 @@ export default function EventDetailsPage() {
 
           <div className="flex items-center gap-4 text-xs sm:text-sm text-stone-200 pt-1 flex-wrap font-medium">
             <span className="flex items-center gap-1 text-orange-300 font-semibold">
-              <span>📅</span> {formatEventDate(startDate)}
+              <span>
+                <Calendar className="w-4 h-4" />
+              </span>{" "}
+              {formatEventDate(startDate)}
             </span>
             <span>•</span>
             <span className="flex items-center gap-1">
-              <span>🕒</span> {formatEventTime(startDate)}
+              <span>
+                <Clock className="w-4 h-4" />
+              </span>{" "}
+              {formatTimeRange(startDate, endDate)}
             </span>
             <span>•</span>
             <span className="flex items-center gap-1">
-              <span>📍</span> Bangalore International Centre, Domlur, Bengaluru
+              <span>
+                <MapPin className="w-4 h-4" />
+              </span>{" "}
+              {venue}
             </span>
           </div>
         </div>
@@ -155,7 +254,10 @@ export default function EventDetailsPage() {
               </span>
               {tags?.map((tag, index) => {
                 return (
-                  <span className="text-xs font-medium text-stone-600 bg-stone-100 px-2.5 py-1 rounded-lg">
+                  <span
+                    key={index}
+                    className="text-xs font-medium text-stone-600 bg-stone-100 px-2.5 py-1 rounded-lg"
+                  >
                     #{tag}
                   </span>
                 );
@@ -168,7 +270,7 @@ export default function EventDetailsPage() {
             <h3 className="text-lg font-bold text-stone-900">Venue & Access</h3>
             <div className="bg-[#FAF9F5] rounded-2xl p-4 border border-[#EAE7DC] flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-orange-100 text-[#C2410C] flex items-center justify-center shrink-0 text-lg">
-                📍
+                <MapPin />
               </div>
               <div>
                 <p className="font-bold text-sm text-stone-900">{venue}</p>
@@ -356,13 +458,13 @@ export default function EventDetailsPage() {
                   Admission Pass
                 </span>
                 <div className="text-3xl font-extrabold text-stone-900 mt-0.5">
-               {formatPrice(price,currency)}
+                  {formatPrice(price, currency)}
                 </div>
               </div>
 
               <div className="text-right">
                 <span className="text-xs font-semibold px-2.5 py-1 bg-stone-100 text-stone-700 rounded-lg">
-              {formatEventDate(endDate)}days remaining
+                  {findDiffTime(startDate)}
                 </span>
               </div>
             </div>
@@ -371,17 +473,23 @@ export default function EventDetailsPage() {
             <div className="space-y-2">
               <div className="flex justify-between text-xs text-stone-600">
                 <span className="flex items-center gap-1.5 font-medium">
-                  <span>👥</span> Capacity
+                  <span>
+                    <Users className="h-4 w-4" />
+                  </span>{" "}
+                  Capacity
                 </span>
                 <span className="font-bold text-stone-900">
                   {registeredCount} of {capacity} seats filled
                 </span>
               </div>
-              <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
-                <div className="h-full bg-[#E65100] rounded-full transition-all w-[80%]" />
+              <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden ">
+                <div
+                  className="h-full bg-[#E65100] rounded-full transition-all"
+                  style={{ width: `${filledPercentage}%` }}
+                />
               </div>
               <p className="text-[11px] text-stone-400 text-right">
-                {capacity-registeredCount} seats remaining
+                {capacity - registeredCount} seats remaining
               </p>
             </div>
 
@@ -398,20 +506,27 @@ export default function EventDetailsPage() {
                 type="button"
                 className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium h-10 px-4 py-2 border border-[#CCC8BA] bg-transparent hover:bg-[#F2F1EC] text-[#222] w-full"
               >
-                <span>📅</span> Add to My Schedule
+                <span>
+                  <Calendar className="h-4 w-4" />
+                </span>{" "}
+                Add to My Schedule
               </button>
             </div>
 
             {/* Trust points */}
             <div className="pt-4 border-t border-[#F2EFE8] space-y-2 text-[11px] text-stone-500">
               <div className="flex items-center gap-2">
-                <span className="text-emerald-600">🛡️</span>
+                <span className="text-emerald-600">
+                  <ShieldCheck className="w-4 h-4" />
+                </span>
                 <span>
                   Verified organizer & authentic attendee review policy
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-stone-400">✓</span>
+                <span className="text-stone-400">
+                  <CheckIcon className="w-4 h-4" />
+                </span>
                 <span>Digital ticket QR sent to your email instantly</span>
               </div>
             </div>

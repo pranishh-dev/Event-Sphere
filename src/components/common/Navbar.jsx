@@ -13,11 +13,13 @@ import { Link } from "react-router";
 
 import { useState } from "react";
 import { Button } from "../ui/button";
+import { useSelector } from "react-redux";
 
 function Navbar() {
   const [isMobileMenuOpen, setisMobileMenuOpen] = useState(false);
+
   return (
-    <header className="sticky top-0 z-4 w-full bg-[#FAF9F5]/90 backdrop-blur-md ">
+    <header className="sticky top-0 z-100 w-full bg-[#FAF9F5]/90 backdrop-blur-md ">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-18 border-b border-[#EBE8DF]">
         {/* Logo- Small and Big Devices */}
         <div className="flex gap-4">
