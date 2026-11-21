@@ -15,6 +15,7 @@ import {
   GraduationCap,
   Music,
   Palette,
+  Pin,
   Sparkles,
   Tag,
   Trophy,
@@ -88,7 +89,7 @@ export default function HomePage() {
         } = await axios.get(
           "https://eventsphere-server-mfdb.onrender.com/api/events",
         );
-        console.log(data);
+        //console.log(data);
         setFeaturedEvents(data);
       } catch (error) {}
 
@@ -98,7 +99,7 @@ export default function HomePage() {
         } = await axios.get(
           "https://eventsphere-server-mfdb.onrender.com/api/categories",
         );
-        console.log(data);
+        //console.log(data);
         setCategories(data);
       } catch (error) {}
 
@@ -108,7 +109,7 @@ export default function HomePage() {
         } = await axios.get(
           "https://eventsphere-server-mfdb.onrender.com/api/events?limit=8&sort=startDate&order=asc",
         );
-        console.log(data);
+        //console.log(data);
         setTrendingEvents(data);
       } catch (error) {}
       setIsLoading(false);
@@ -273,7 +274,9 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute bottom-4 left-4 right-4 text-white">
                 <div className="flex items-center gap-1.5 text-orange-400 text-xs font-semibold">
-                  <span>📍</span>
+                  <span>
+                    <Pin />
+                  </span>
                   <span>{city}</span>
                 </div>
                 <p className="text-xs text-stone-300 font-medium mt-0.5">
@@ -301,43 +304,18 @@ export default function HomePage() {
             className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-xs rounded-lg font-medium border border-[#CCC8BA] bg-transparent hover:bg-[#F2F1EC] text-[#222]"
           >
             <span>View All Events</span>
-            <span><ArrowRight className="w-4 h-4"/></span>
+            <span>
+              <ArrowRight className="w-4 h-4" />
+            </span>
           </Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {isLoading
-            ? [...Array(8)].map((_,i) => <Skeleton key={i}/>)
-            : trendingEvents.map(
-                ({
-                  id,
-                  image,
-                  title,
-                  city,
-                  format,
-                  currency,
-                  category,
-                  price,
-                  startDate,
-                  slug,
-                }) => {
-                  return (
-                    <EventCard
-                      key={id}
-                      id={id}
-                      image={image}
-                      title={title}
-                      city={city}
-                      format={format}
-                      currency={currency}
-                      category={category}
-                      price={price}
-                      startDate={startDate}
-                      slug={slug}
-                    />
-                  );
-                },
-              )}
+            ? [...Array(8)].map((_, i) => <Skeleton key={i} />)
+            : trendingEvents.map((event, i) => {
+                return <EventCard key={i} event={event} />;
+              })}
         </div>
       </section>
 

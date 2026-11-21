@@ -1,19 +1,39 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+
+export const checkIndexFav=(items,event)=>{
+  const index = items.findIndex(
+        (e) =>
+          (e.id || e._id) == (event.id || event._id),
+      );
+  return index
+}
+
 const favouritesSlice = createSlice({
   name: "favourites",
-  initialState: { count: 0, isFavourite: false },
+  initialState:{items:[]},
   reducers: {
-    clearFavourites() {},
-    toggleFavourite(state, action) {
-      state.isFavourite = !state.isFavourite;
-      console.log(state.isFavourite);
+    clearFavourites(state) {
+      state.items=[]
     },
-    removeFavourite() {},
-  },
+    toggleFavourite(state, action) {
+      
+      let index = checkIndexFav(state.items,action.payload)
+      if (index >= 0) {
+        state.items.splice(index, 1);
+      } else {
+        state.items.push(action.payload);
+      }
+
+      // const isExist = state.items.find(
+      //   (e) => (e.id || e._id) == (action.payload.id || action.payload._id),
+      // );
+      // console.log(isExist);
+    }
+  }
 });
 
-export const { clearFavourites, toggleFavourite, removeFavourite } =
+export const { clearFavourites, toggleFavourite } =
   favouritesSlice.actions;
 
 export default favouritesSlice.reducer;

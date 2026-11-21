@@ -11,23 +11,26 @@ import {
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router";
-export const EventCard = ({
-  id,
-  image,
-  title,
-  city,
-  format,
-  currency,
-  category,
-  price,
-  startDate,
-  slug,
-  Icon,
-}) => {
-  const dispatch = useDispatch();
-  const isFavourite = useSelector((state) => state.favourites.isFavourite);
-  console.log(isFavourite);
+export const EventCard = ({ event }) => {
+  const {
+    id,
+    image,
+    title,
+    city,
+    format,
+    currency,
+    category,
+    price,
+    startDate,
+    slug,
+  } = event;
 
+  const dispatch = useDispatch();
+  const handleFavourite = (e) => {
+    e.preventDefault();
+    dispatch(toggleFavourite(event));
+  };
+  
   return (
     <Link
       to={`/events/${slug}-${id}`}
@@ -45,18 +48,12 @@ export const EventCard = ({
               {category.name}
             </span>
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                // dispatch(increaseCount())
-                dispatch(toggleFavourite());
-              }}
+              onClick={handleFavourite}
               type="button"
               className="pointer-events-auto w-8 h-8 rounded-full bg-white/90 backdrop-blur-md shadow-sm border border-black/5 flex items-center justify-center text-stone-700 text-xs"
             >
               <span>
-                <Bookmark
-                  className={`w-4 h-4 ${isFavourite ? "fill-black" : ""}`}
-                />
+                <Bookmark className={`w-4 h-4 `} />
               </span>
             </button>
           </div>

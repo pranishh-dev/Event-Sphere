@@ -106,7 +106,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  to="/favorites"
+                  to="/favourites"
                   className="hover:text-white transition-colors"
                 >
                   Saved Collections

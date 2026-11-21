@@ -5,7 +5,7 @@ import {
   formatTimeRange,
 } from "@/lib/utils";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { differenceInDays, parseISO } from "date-fns";
 import { Link, useLocation, useParams } from "react-router";
 import { NotFoundPage } from "./NotFoundPage";
@@ -33,6 +33,8 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useDispatch, useSelector } from "react-redux";
+import { checkIndexFav, toggleFavourite } from "@/store/slices/favouritesSlice";
 
 let Modes = {
   online: "Online Conclave",
@@ -40,28 +42,13 @@ let Modes = {
   hybrid: "Hybrid Format",
 };
 
-async function handleShare() {
-  try {
-    toast.success("Event Link Copied to Clipboard!");
-    await navigator.clipboard.writeText(window.location.href);
-  } catch (error) {
-    toast.error("Failed to Copy To Clipboard!");
-  }
-}
-
-function handleSave(){
-  try {
-    toast.success("Event Saved to Favourites!");
-     navigator.clipboard.writeText(window.location.href);
-  } catch (error) {
-    toast.error("Failed to Save to Favourites!");
-  }
-}
-
 export default function EventDetailsPage() {
   const [event, setEvent] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const { slugId } = useParams();
+
+  const dispatch = useDispatch();
+  const favouriteItems = useSelector((state) => state.favourites.items);
 
   // Find the last hyphen separating the slug from the MongoDB ObjectId
   const lastHyphenIndex = slugId?.lastIndexOf("-") ?? -1;
@@ -74,6 +61,34 @@ export default function EventDetailsPage() {
   // 2. If there's no valid ID (e.g. /events/react-developers-summit-2027), show 404
   if (!isValidId) {
     return <NotFoundPage />;
+  }
+  const isFav = useMemo(
+    () => (event ? checkIndexFav(favouriteItems, event) >= 0 : false),
+    [favouriteItems, event],
+  );
+
+  async function handleShare() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Event Link Copied to Clipboard!");
+    } catch (error) {
+      toast.error("Failed to Copy To Clipboard!");
+    }
+  }
+
+  function handleSave() {
+    try {
+      if (!event) return;
+      if (isFav) {
+        toast.info("Event removed from favourites!");
+      } else {
+        toast.success("Event saved to favourites!");
+      }
+
+      dispatch(toggleFavourite(event));
+    } catch (error) {
+      toast.error("Failed to save to favourites!");
+    }
   }
 
   async function fetchEvent() {
@@ -174,12 +189,12 @@ export default function EventDetailsPage() {
           </button>
 
           <button
-          onClick={handleSave}
+            onClick={handleSave}
             type="button"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer bg-white border-[#DDD9CE] hover:bg-stone-50 text-stone-700"
           >
             <span>
-              <Bookmark className="w-4 h-4" />
+              <Bookmark className={`w-4 h-4 ${isFav && "fill-black"}`} />
             </span>
             <span>Save</span>
           </button>

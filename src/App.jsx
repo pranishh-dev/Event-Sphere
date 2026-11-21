@@ -7,11 +7,11 @@ import { NotFoundPage } from "./pages/NotFoundPage";
 import { EventCard } from "./components/events/eventCard";
 import EventDetailsPage from "./pages/EventDetailsPage";
 import { Toaster } from "sonner";
-import "./App.css"
+import "./App.css";
+import FavouritesPage from "./pages/FavouritesPage";
+import ExplorePage from "./pages/ExplorePage";
 
 function App() {
-  
-
   function ScrollToTop() {
     const { pathname } = useLocation();
     useEffect(() => {
@@ -21,13 +21,15 @@ function App() {
 
   return (
     <main className="min-h-screen flex flex-col bg-[#FAF9F5] text-stone-900 selection:bg-orange-100 selection:text-[#E65100]">
-      <Toaster position="top-right" richColors/>
+      <Toaster position="top-right" richColors />
       <ScrollToTop />
       <Navbar />
       <div className=" flex-1">
         <Routes>
-          <Route path="/" element={<HomePage  />} />
-          <Route path="/events/:slugId" element={<EventDetailsPage  />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/events/:slugId" element={<EventDetailsPage />} />
+          <Route path="/favourites" element={<FavouritesPage />} />
+          <Route path="/explore" element={<ExplorePage/>} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
