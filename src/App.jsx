@@ -11,6 +11,7 @@ import "./App.css";
 import FavouritesPage from "./pages/FavouritesPage";
 import ExplorePage from "./pages/ExplorePage";
 
+
 function App() {
   function ScrollToTop() {
     const { pathname } = useLocation();
